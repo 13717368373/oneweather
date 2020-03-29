@@ -1,15 +1,11 @@
 package com.example.oneweather;
 
 
-import android.annotation.TargetApi;
+import android.app.Fragment;
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.app.Fragment;
-
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,22 +22,22 @@ import androidx.annotation.RequiresApi;
 import com.example.oneweather.db.City;
 import com.example.oneweather.db.County;
 import com.example.oneweather.db.Province;
-//import com.example.oneweather.gson.Weather;
 import com.example.oneweather.util.HttpUtil;
 import com.example.oneweather.util.Utility;
-import com.example.oneweather.db.City;
 
 import org.json.JSONException;
 import org.litepal.crud.DataSupport;
 
 import java.io.IOException;
-import java.nio.file.WatchEvent;
 import java.util.ArrayList;
 import java.util.List;
 
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Response;
+
+//import com.example.oneweather.gson.Weather;
+
 public class ChooseAreaFragment extends Fragment {
 
     public static final int LEVEL_PROVINCE=0;
@@ -95,10 +91,15 @@ public class ChooseAreaFragment extends Fragment {
                 if(currentLevel==LEVEL_PROVINCE){
                     selectedProvince=provincesList.get(position);
                     queryCities();
-                }else if(currentLevel==LEVEL_CITY)
-                {
+                }else if(currentLevel==LEVEL_CITY) {
                     selectedCity=cityList.get(position);
                     queryCounties();
+                }else if(currentLevel==LEVEL_COUNTY){
+                    String weatherId=countyList.get(position).getWeatherId();
+                    Intent intent=new Intent(getActivity(), WeatherActivity.class);
+                    intent.putExtra("weather_id",weatherId);
+                    startActivity(intent);
+                    getActivity().finish();
                 }
             }
         });
