@@ -14,6 +14,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.bumptech.glide.Glide;
 import com.example.oneweather.gson.Daily_forecast;
@@ -39,8 +40,10 @@ public class WeatherActivity extends AppCompatActivity {
     private TextView sportText;
     private TextView cwText;
     private ImageView bingPicImg;
-
+    private SwipeRefreshLayout swipeRefreshLayout;
     private String mWeatherId;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -61,28 +64,33 @@ public class WeatherActivity extends AppCompatActivity {
         sportText=findViewById(R.id.sport_text);
         cwText=findViewById(R.id.cw_text);
         forecastLayout=findViewById(R.id.forecast_layout);
+        swipeRefreshLayout=findViewById(R.id.swipe_refresh);
+        swipeRefreshLayout.setColorSchemeResources(R.color.colorPrimary);
 
         //从本地获取数据信息
         SharedPreferences preferences= PreferenceManager.getDefaultSharedPreferences(this);
         String weatherString =preferences.getString("weather",null);
+
         if(weatherString!=null){
-            /*Weather weather= Utility.handleWeatherResponse(weatherString);
-            showWeatherInfo(weather);*/
-
+            //有天气信息时直接解析数据
             Weather weather= Utility.handleWeatherResponse(weatherString);
-            //mWeatherId=weather.basic.cityId;
-
+            mWeatherId=weather.basic.cityId;
             showWeatherInfo(weather);
 
         }else{
-          /*  String weatherId=getIntent().getStringExtra("weather_id");
-            requestWeather(weatherId);*/
-
-            mWeatherId=getIntent().getStringExtra("weather_id");
+            //无缓存时区服务器查询天气
+            mWeatherId=getIntent().getStringExtra("weather_id");//获取ChooseAreaFragment100行传入的值
             weatherLayout.setVisibility(View.INVISIBLE);
             requestWeather(mWeatherId);
-
         }
+        //刷新通过查询获取数据
+        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                requestWeather(mWeatherId);
+            }
+        });
+
         //获取本地必应图片
         String bingPic=preferences.getString("bing_pic",null);
         if(bingPic!=null){
@@ -106,6 +114,7 @@ public class WeatherActivity extends AppCompatActivity {
                     @Override
                     public void run() {
                         Toast.makeText(WeatherActivity.this,"获取天气信息失败",Toast.LENGTH_SHORT).show();
+                        swipeRefreshLayout.setRefreshing(false);
                     }
                 });
             }
@@ -121,10 +130,12 @@ public class WeatherActivity extends AppCompatActivity {
                             SharedPreferences.Editor editor=PreferenceManager.getDefaultSharedPreferences(WeatherActivity.this).edit();
                             editor.putString("weather",responseText);
                             editor.apply();
+                            mWeatherId=weather.basic.cityId;
                             showWeatherInfo(weather);
                         }else{
                             Toast.makeText(WeatherActivity.this, "获取天气信息失败", Toast.LENGTH_SHORT).show();
                         }
+                        swipeRefreshLayout.setRefreshing(false);
                     }
                 });
             }
