@@ -1,5 +1,6 @@
 package com.example.oneweather;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Build;
@@ -196,7 +197,7 @@ public class WeatherActivity extends AppCompatActivity {
         String weatherInfo=weather.now.cond_txt;
         //Log.i("weatherInfo：",weatherInfo);
         titleCity.setText(cityName);
-        titleUpdateTime.setText(updateTime);
+        titleUpdateTime.setText(updateTime+"更新");
         degreeText.setText(degree);
         weatherInfoText.setText(weatherInfo);
 
@@ -228,6 +229,8 @@ public class WeatherActivity extends AppCompatActivity {
         cwText.setText(carWash);
         sportText.setText(sport);
         weatherLayout.setVisibility(View.VISIBLE);
+        Intent intent=new Intent(this,AutoUpdateService.class);
+        startService(intent);
     }
 
 }
